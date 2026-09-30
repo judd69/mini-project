@@ -38,6 +38,7 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 CSRF_TRUSTED_ORIGINS = [
+    'https://*.azurewebsites.net',
     f"https://{os.environ.get('WEBSITE_HOSTNAME', 'localhost')}",
 ]
 
