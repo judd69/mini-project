@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Results — {{ election.title }} — SecureVote{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center mb-12 animate-fade-in">
+        {% if election.is_ended %}
+            <span class="status-badge-ended mb-4 inline-flex">Final Results</span>
+        {% else %}
+            <span class="status-badge-live mb-4 inline-flex">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                Live Results
+            </span>
+        {% endif %}
+        <h1 class="text-3xl sm:text-4xl font-bold text-white mt-4">{{ election.title }}</h1>
+        <p class="text-slate-400 mt-2">{{ total_votes }} total vote{{ total_votes|pluralize }}</p>
+    </div>
+
+    {% if results %}
+    <!-- Results Cards -->
+    <div class="space-y-4">
+        {% for item in results %}
+        <div class="result-card animate-slide-up" style="animation-delay: {{ forloop.counter0 }}50ms;">
+            <div class="flex items-center gap-4">
+                <!-- Rank -->
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0
+                    {% if forloop.first %}bg-amber-500/10 text-amber-400 border border-amber-500/20
+                    {% elif forloop.counter == 2 %}bg-slate-400/10 text-slate-300 border border-slate-400/20
+                    {% elif forloop.counter == 3 %}bg-orange-600/10 text-orange-400 border border-orange-600/20
+                    {% else %}bg-white/5 text-slate-500 border border-white/5{% endif %}">
+                    <span class="text-sm font-bold">#{{ forloop.counter }}</span>
+                </div>
+
+                <!-- Candidate Info -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h3 class="text-lg font-semibold text-white truncate">{{ item.candidate.name }}</h3>
+                        {% if item.candidate.party %}
+                        <span class="shrink-0 px-2 py-0.5 rounded-full bg-white/5 text-xs text-slate-400 font-medium">
+                            {{ item.candidate.party }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-1000 ease-out
+                            {% if forloop.first %}bg-gradient-to-r from-primary-500 to-purple-500
+                            {% else %}bg-gradient-to-r from-primary-600/60 to-purple-600/60{% endif %}"
+                            style="width: {{ item.percentage }}%;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vote Count -->
+                <div class="text-right shrink-0 ml-4">
+                    <span class="text-2xl font-bold {% if forloop.first %}text-primary-400{% else %}text-white{% endif %}">
+                        {{ item.percentage }}%
+                    </span>
+                    <p class="text-xs text-slate-500 mt-0.5">{{ item.votes }} vote{{ item.votes|pluralize }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Election Info Footer -->
+    <div class="mt-10 text-center text-xs text-slate-500 space-y-1 animate-slide-up">
+        <p>Election Period: {{ election.start_date|date:"M d" }} — {{ election.end_date|date:"M d, Y" }}</p>
+        <p class="flex items-center justify-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            All ballots verified with HMAC-SHA256 integrity checks
+        </p>
+    </div>
+    {% else %}
+    <div class="text-center py-20">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-surface-900 border border-white/5 flex items-center justify-center mb-6">
+            <svg class="w-8 h-8 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white">No votes yet</h3>
+        <p class="text-slate-400 mt-2">Results will appear once the first ballot is cast.</p>
+    </div>
+    {% endif %}
+
+    <!-- Back Link -->
+    <div class="mt-10 text-center">
+        <a href="{% url 'election_list' %}" class="btn-ghost">
+            ← Back to Elections
+        </a>
+    </div>
+</div>
+{% endblock %}

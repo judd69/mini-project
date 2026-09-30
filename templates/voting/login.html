@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Login — SecureVote{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md animate-slide-up">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center shadow-lg shadow-primary-500/25 mb-4">
+                <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-white">Welcome Back</h1>
+            <p class="text-slate-400 mt-2 text-sm">Log in to access your voting dashboard</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-surface-900 border border-white/5 rounded-2xl p-6 sm:p-8 shadow-xl">
+            <form method="POST" class="space-y-5" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="bg-rose-500/10 border border-rose-500/20 rounded-xl px-4 py-3 text-sm text-rose-400">
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-300 mb-1.5">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="mt-1.5">
+                        {% for error in field.errors %}
+                        <p class="text-xs text-rose-400 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            {{ error }}
+                        </p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn-primary w-full mt-2">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                    Log In
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-sm text-slate-400">
+                Don't have an account?
+                <a href="{% url 'register' %}" class="text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                    Register
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

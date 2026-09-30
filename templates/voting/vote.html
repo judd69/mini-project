@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Vote — {{ election.title }} — SecureVote{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Election Header -->
+    <div class="text-center mb-12 animate-fade-in">
+        <span class="status-badge-live mb-4 inline-flex">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Live Election
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-bold text-white mt-4">{{ election.title }}</h1>
+        <p class="text-slate-400 mt-3 max-w-xl mx-auto">{{ election.description }}</p>
+        <p class="text-xs text-slate-500 mt-4">
+            Voting closes {{ election.end_date|date:"F d, Y \a\t g:i A" }}
+        </p>
+    </div>
+
+    <!-- CSRF Token for AJAX -->
+    {% csrf_token %}
+
+    <!-- Candidate Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6" id="candidate-grid">
+        {% for candidate in candidates %}
+        <div class="candidate-card group cursor-pointer animate-slide-up"
+             data-candidate-id="{{ candidate.id }}"
+             style="animation-delay: {{ forloop.counter0 }}50ms;"
+             onclick="selectCandidate(this, {{ candidate.id }})">
+
+            <!-- Selection Indicator -->
+            <div class="absolute top-4 right-4 w-6 h-6 rounded-full border-2 border-white/10 flex items-center justify-center transition-all duration-300 selection-indicator">
+                <svg class="w-4 h-4 text-white opacity-0 transition-opacity duration-300 check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+
+            <!-- Candidate Avatar -->
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-300">
+                <span class="text-2xl font-bold bg-gradient-to-br from-primary-400 to-purple-400 bg-clip-text text-transparent">
+                    {{ candidate.name|make_list|first }}
+                </span>
+            </div>
+
+            <!-- Candidate Info -->
+            <h3 class="text-lg font-semibold text-white group-hover:text-primary-400 transition-colors">
+                {{ candidate.name }}
+            </h3>
+            {% if candidate.party %}
+            <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-white/5 text-xs text-slate-400 font-medium">
+                {{ candidate.party }}
+            </span>
+            {% endif %}
+            {% if candidate.bio %}
+            <p class="text-sm text-slate-400 mt-3 line-clamp-3">{{ candidate.bio }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Submit Button -->
+    <div class="mt-10 text-center animate-slide-up" style="animation-delay: 0.4s;">
+        <button id="submit-vote-btn"
+                class="btn-primary-lg opacity-50 cursor-not-allowed transition-all duration-300"
+                disabled
+                onclick="submitVote()">
+            <span id="btn-text">Select a Candidate to Vote</span>
+            <svg id="btn-spinner" class="hidden animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </button>
+        <p class="text-xs text-slate-500 mt-3">
+            <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Your vote is sealed with HMAC-SHA256 encryption
+        </p>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="success-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="bg-surface-900 border border-white/10 rounded-2xl p-8 max-w-md mx-4 text-center animate-bounce-in shadow-2xl">
+        <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-6">
+            <svg class="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <h3 class="text-xl font-bold text-white">Vote Cast Successfully!</h3>
+        <p class="text-slate-400 mt-2" id="success-message">Your vote has been recorded securely.</p>
+        <p class="text-xs text-slate-500 mt-3">Ballot Hash: <code class="text-primary-400" id="ballot-hash-display">-</code></p>
+        <a href="#" id="success-redirect" class="btn-primary mt-6 inline-flex">
+            View Confirmation
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/vote.js' %}"></script>
+{% endblock %}

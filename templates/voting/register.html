@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Register — SecureVote{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md animate-slide-up">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center shadow-lg shadow-primary-500/25 mb-4">
+                <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-white">Create Account</h1>
+            <p class="text-slate-400 mt-2 text-sm">Register to start voting in secure elections</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-surface-900 border border-white/5 rounded-2xl p-6 sm:p-8 shadow-xl">
+            <form method="POST" class="space-y-5" novalidate>
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-300 mb-1.5">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="mt-1.5 space-y-1">
+                        {% for error in field.errors %}
+                        <p class="text-xs text-rose-400 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            {{ error }}
+                        </p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% if field.help_text %}
+                    <p class="text-xs text-slate-500 mt-1">{{ field.help_text }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn-primary w-full mt-2">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                    Create Account
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-sm text-slate-400">
+                Already have an account?
+                <a href="{% url 'login' %}" class="text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                    Log in
+                </a>
+            </div>
+        </div>
+
+        <!-- Security Note -->
+        <p class="text-center text-xs text-slate-500 mt-6 flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Your data is encrypted and never shared
+        </p>
+    </div>
+</div>
+{% endblock %}
