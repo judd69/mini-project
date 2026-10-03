@@ -20,7 +20,10 @@ DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///db.sqlite3',
         conn_max_age=600,
-        ssl_require=True,
+        conn_health_checks=True,
+        # ssl_require is NOT set here — Azure SQL connection strings
+        # already include SSL params. Setting it to True breaks the
+        # SQLite dev-fallback and causes SSL errors on some Azure tiers.
     )
 }
 

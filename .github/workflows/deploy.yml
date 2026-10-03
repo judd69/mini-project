@@ -1,3 +1,17 @@
+# ═══════════════════════════════════════════════════════════════════
+# SecureVote — Deploy to Azure App Service
+#
+# Required GitHub Secrets (Settings → Secrets → Actions):
+#   AZURE_WEBAPP_PUBLISH_PROFILE  — download from Azure Portal →
+#                                   App Service → Overview → Get publish profile
+#
+# Required Azure App Service → Configuration → Application Settings:
+#   DJANGO_SETTINGS_MODULE  = securevote.settings.production
+#   DJANGO_SECRET_KEY       = <long random string>
+#   DATABASE_URL            = <your Azure DB connection URL>  (optional — omit for SQLite)
+#   WEBSITE_HOSTNAME        = <your-app>.azurewebsites.net   (set automatically by Azure)
+# ═══════════════════════════════════════════════════════════════════
+
 name: Deploy to Azure App Service
 
 on:
@@ -6,7 +20,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: securevote-app
+  AZURE_WEBAPP_NAME: securevote-india-unique   # ✅ matches your Azure App Service
   PYTHON_VERSION: '3.11'
 
 jobs:
@@ -14,28 +28,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ── 1. Checkout ────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      # ── 2. Python Setup ───────────────────────────────────────────
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
+      # ── 3. Install dependencies into a target folder ──────────────
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # ── 4. Collect static files (using production settings) ───────
+      # We set a dummy SECRET_KEY so collectstatic doesn't fail.
+      # The real key is set as an App Service Application Setting.
       - name: Collect static files
-        run: |
-          python manage.py collectstatic --noinput
+        run: python manage.py collectstatic --noinput
         env:
-          DJANGO_SETTINGS_MODULE: securevote.settings.development
+          DJANGO_SETTINGS_MODULE: securevote.settings.production
+          DJANGO_SECRET_KEY: dummy-key-for-collectstatic-only
+          DATABASE_URL: sqlite:///db.sqlite3   # avoids needing DB during build
 
+      # ── 5. Zip artifact for deployment ────────────────────────────
+      - name: Create deployment package
+        run: |
+          zip -r deploy.zip . \
+            --exclude ".git/*" \
+            --exclude "venv/*" \
+            --exclude ".github/*" \
+            --exclude "__pycache__/*" \
+            --exclude "*.pyc"
+
+      # ── 6. Deploy to Azure Web App ────────────────────────────────
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: deploy.zip
+          startup-command: 'bash startup.sh'
