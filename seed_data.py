@@ -35,25 +35,25 @@ if created:
 
     candidates_data = [
         {
-            'name': 'Aria Chen',
+            'name': 'Shanty Chen',
             'party': 'Innovation Alliance',
             'bio': 'Computer Science major with a vision for modernizing campus technology and creating inclusive study spaces for all students.',
             'display_order': 1,
         },
         {
-            'name': 'Marcus Johnson',
+            'name': 'Jiya Johnson',
             'party': 'Unity Coalition',
             'bio': 'Political Science student focused on mental health resources, affordable housing, and strengthening student government transparency.',
             'display_order': 2,
         },
         {
-            'name': 'Priya Patel',
+            'name': 'Ayaan Boss',
             'party': 'Green Campus',
             'bio': 'Environmental Engineering student championing sustainability initiatives, campus recycling programs, and renewable energy adoption.',
             'display_order': 3,
         },
         {
-            'name': 'David Kim',
+            'name': 'Aamir Khan',
             'party': 'Independent',
             'bio': 'Business Administration student advocating for entrepreneurship programs, career development workshops, and alumni networking events.',
             'display_order': 4,
