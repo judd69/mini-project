@@ -1,9 +1,8 @@
 """
-SecureVote — Production settings (Azure SQL, DEBUG=False).
+SecureVote — Production settings (Azure App Service).
 Activate with: DJANGO_SETTINGS_MODULE=securevote.settings.production
 """
 import os
-import dj_database_url
 from .base import *  # noqa: F401,F403
 
 DEBUG = False
@@ -14,24 +13,20 @@ ALLOWED_HOSTS = [
 ]
 
 # ── Database ──────────────────────────────────────────────────────────
-# Reads DATABASE_URL from Azure App Service configuration.
-# Fallback to SQLite if not set (shouldn't happen in production).
+# SQLite on Azure persistent storage (/home survives restarts).
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///db.sqlite3',
-        conn_max_age=600,
-        conn_health_checks=True,
-        # ssl_require is NOT set here — Azure SQL connection strings
-        # already include SSL params. Setting it to True breaks the
-        # SQLite dev-fallback and causes SSL errors on some Azure tiers.
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/home/db.sqlite3',
+    }
 }
 
 # ── Security Hardening ────────────────────────────────────────────────
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 31_536_000   # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# NOTE: Do NOT set SECURE_SSL_REDIRECT = True on Azure App Service.
+# Azure's load balancer handles HTTPS termination and the internal
+# warmup probe hits http://localhost:8000 — if we redirect that to
+# HTTPS, Azure never gets a 200 and the container times out.
+SECURE_SSL_REDIRECT = False
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 SESSION_COOKIE_SECURE = True
@@ -60,12 +55,12 @@ LOGGING = {
     },
     'root': {
         'handlers': ['console'],
-        'level': 'WARNING',
+        'level': 'INFO',
     },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': 'INFO',
             'propagate': False,
         },
     },
